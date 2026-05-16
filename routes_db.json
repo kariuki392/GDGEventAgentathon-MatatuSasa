@@ -1,0 +1,46 @@
+{
+  "kawangware": {
+    "cbd": {
+      "route_number": "46",
+      "stage": "Kawangware Stage / Congo",
+      "drop_off": "Kencom / Ambassador",
+      "normal_fare": 50,
+      "rush_hour_fare": 100,
+      "duration": "45 mins"
+    }
+  },
+  "cbd": {
+    "ruai": {
+      "route_number": "19/60",
+      "stage": "Commercial / BS",
+      "drop_off": "Ruai Stage",
+      "normal_fare": 80,
+      "rush_hour_fare": 150,
+      "duration": "1 hour 20 mins"
+    },
+    "kawangware": {
+      "route_number": "46",
+      "stage": "Kencom / GPO",
+      "drop_off": "Kawangware",
+      "normal_fare": 50,
+      "rush_hour_fare": 100,
+      "duration": "45 mins"
+    },
+    "westlands": {
+      "route_number": "23",
+      "stage": "Odeon / Koja",
+      "drop_off": "Westlands Stage",
+      "normal_fare": 30,
+      "rush_hour_fare": 50,
+      "duration": "20 mins"
+    },
+    "kasarani": {
+      "route_number": "17B / 145",
+      "stage": "BS / Koja",
+      "drop_off": "Kasarani / Mwiki",
+      "normal_fare": 50,
+      "rush_hour_fare": 100,
+      "duration": "1 hour"
+    }
+  }
+}
