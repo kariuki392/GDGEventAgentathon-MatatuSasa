@@ -1,6 +1,6 @@
 import os
 import uvicorn
-from fastapi import FastAPI, Request, BackgroundTasks
+from fastapi import FastAPI, Request, Response, BackgroundTasks
 import africastalking
 from agent import get_agent_client, create_chat_session
 from dotenv import load_dotenv
@@ -90,6 +90,54 @@ async def incoming_messages(request: Request, background_tasks: BackgroundTasks)
     
     # Africa's Talking requires a 200 OK or it will retry
     return {"status": "success"}
+
+@app.post("/ussd")
+async def ussd_callback(request: Request):
+    """
+    Africa's Talking hits this endpoint for USSD sessions.
+    Returns plain text starting with CON or END.
+    """
+    form_data = await request.form()
+    
+    session_id = form_data.get("sessionId")
+    phone_number = form_data.get("phoneNumber")
+    text = form_data.get("text", "")
+    
+    print(f"\n[USSD INCOMING] from {phone_number}: '{text}'")
+    
+    # AT sends the whole history separated by '*'. The last part is the current input.
+    parts = text.split('*')
+    current_input = parts[-1] if text else ""
+    
+    if current_input == "":
+        # Initial request
+        response_text = "CON Welcome to Matatu Sasa!\nWhere are you heading today?\n(e.g., Kawangware to Ruai)"
+        return Response(content=response_text, media_type="text/plain")
+        
+    if not gemini_client:
+        response_text = "END Pole, Matatu Sasa AI is currently offline."
+        return Response(content=response_text, media_type="text/plain")
+        
+    # Get or create chat session
+    if phone_number not in chat_sessions:
+        chat_sessions[phone_number] = create_chat_session(gemini_client)
+        
+    session = chat_sessions[phone_number]
+    
+    try:
+        # Ask Gemini to keep it short for USSD
+        ussd_prompt = f"{current_input}\n(Please keep the response very short and concise as this is for USSD)."
+        result = session.send_message(ussd_prompt)
+        reply_text = result.text.strip()
+    except Exception as e:
+        reply_text = "Pole, I ran into an error finding that route."
+        print(f"Error calling Gemini: {e}")
+        
+    # End the session with the response
+    response_text = f"END {reply_text}"
+    
+    print(f"[USSD OUTGOING]: {response_text}")
+    return Response(content=response_text, media_type="text/plain")
 
 if __name__ == "__main__":
     uvicorn.run("sms_server:app", host="0.0.0.0", port=8000, reload=True)
